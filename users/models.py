@@ -22,3 +22,6 @@ class BasketUser(AbstractUser):
     USERNAME_FIELD = "tckn"
 
     objects = BasketUserManager()
+
+    def __str__(self):
+        return f"User {self.tckn}"

@@ -23,7 +23,7 @@ class Preference(TimestampedModel):
     )
 
     def __str__(self):
-        return f"<Preference> {self.user} {self.selections}"
+        return f"<Preference> {self.user} Selections: {self.selections.count()}"
 
     class Meta:
         ordering = ("id",)
