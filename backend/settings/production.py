@@ -6,7 +6,6 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = False
 ALLOWED_HOSTS = [
     env("PRODUCTION_HOST"),
-    "basketistanbul.herokuapp.com",
 ]
 
 

@@ -146,7 +146,10 @@ REST_FRAMEWORK = {
 }
 
 # Allowed hosts
-ALLOWED_HOSTS = ["django", "localhost", os.environ.get("PRODUCTION_HOST")]
+ALLOWED_HOSTS = [
+    "django",
+    "localhost",
+]
 
 # Cors
 CORS_ALLOWED_ORIGINS = [
