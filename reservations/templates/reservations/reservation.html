@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Your Reservation</title>
+</head>
+<body>
+    <p>Hi {{ first_name }}, </p>
+    <p>
+        {% if status == "IN_CART" %}
+            We successfully reserved a slot for you on:
+            <br><br>
+            Slot: <b>{{ slot }}</b>
+            <br>
+            Info: <b>{{ info }}</b>
+            <br><br>
+            <a href="https://online.spor.istanbul/uyesepet">Go to your Spor Istanbul basket to verify!</a> We wish you a happy tennis session!
+        {% else %}
+            We failed to reserve a slot for you on:
+            <br><br>
+            Slot: <b>{{ slot }}</b>
+            <br>
+            Info: <b>{{ info }}</b>
+            <br><br>
+            The slot you selected is either not available or is already reserved by another member.
+            Please try to select a different slot.
+        {% endif %}
+    </p>
+    <br>
+    <p>Kind regards,</p>
+    <p>Basket Istanbul</p>
+</body>
+</html>

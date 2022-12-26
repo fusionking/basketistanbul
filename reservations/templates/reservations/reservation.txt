@@ -1,0 +1,24 @@
+{% if status == "IN_CART" %}
+We successfully reserved a slot for you on:
+
+Slot: {{ slot }}
+
+Info: {{ info }}
+
+Go to your Spor Istanbul basket to verify! We wish you a happy tennis session!
+
+{% else %}
+We failed to reserve a slot for you on:
+
+Slot: {{ slot }}
+
+Info: {{ info }}
+
+The slot you selected is either not available or is already reserved by another member.
+Please try to select a different slot.
+
+{% endif %}
+
+Kind regards,
+
+Basket Istanbul
