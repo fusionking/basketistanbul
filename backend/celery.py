@@ -13,5 +13,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Looks up for task modules in Django applications and loads them
 app.autodiscover_tasks()
 
-app.conf.broker_url = settings.BROKER_URL
+app.conf.update(
+    BROKER_URL=settings.BROKER_URL, CELERY_RESULT_BACKEND=settings.CELERY_RESULT_BACKEND
+)
 app.conf.broker_transport_options = {"visibility_timeout": 1209600}  # 14 days
