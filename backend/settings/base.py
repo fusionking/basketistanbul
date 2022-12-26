@@ -160,8 +160,8 @@ AUTH_USER_MODEL = "users.BasketUser"
 SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(minutes=60)}
 
 # Celery
-BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+BROKER_URL = env("BROKER_URL")
+CELERY_RESULT_BACKEND = env("RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
