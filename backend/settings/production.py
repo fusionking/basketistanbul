@@ -4,7 +4,10 @@ from .base import *
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = False
-ALLOWED_HOSTS = [env("PRODUCTION_HOST"), "basketistanbul.herokuapp.com", ]
+ALLOWED_HOSTS = [
+    env("PRODUCTION_HOST"),
+    "basketistanbul.herokuapp.com",
+]
 
 
 # White Noise configuration - http://whitenoise.evans.io/en/stable/django.html
@@ -19,8 +22,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "../", "frontend", "build", "static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
 
 STATIC_URL = "/static/"
 WHITENOISE_ROOT = os.path.join(BASE_DIR, "../", "frontend", "build", "root")
