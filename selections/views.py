@@ -1,8 +1,7 @@
 from rest_framework_json_api.views import ModelViewSet
 
 from .models import Selection, Slot, SportSelection
-from .serializers import (SelectionSerializer, SlotSerializer,
-                          SportSelectionSerializer)
+from .serializers import SelectionSerializer, SlotSerializer, SportSelectionSerializer
 
 
 class SelectionViewSet(ModelViewSet):

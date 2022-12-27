@@ -4,8 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from selections.models import Selection, SportSelection
 
-from .commands.base import (FillFormCommand, LoginCommand,
-                            ReservationCommandRunner)
+from .commands.base import FillFormCommand, LoginCommand, ReservationCommandRunner
 from .helpers import show_slots
 from .models import Reservation, ReservationJob
 from .serializers import ReservationJobSerializer, ReservationSerializer

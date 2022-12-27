@@ -4,9 +4,7 @@ from .base import *
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = False
-ALLOWED_HOSTS = [
-    env("PRODUCTION_HOST"),
-]
+ALLOWED_HOSTS = [env("PRODUCTION_HOST"), env("FRONTEND_HOST")]
 
 
 # White Noise configuration - http://whitenoise.evans.io/en/stable/django.html
