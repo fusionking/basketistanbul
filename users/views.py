@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .serializers import RegisterSerializer, UserSerializer
 
@@ -17,6 +18,17 @@ class RegisterView(generics.GenericAPIView):
                 "user": UserSerializer(
                     user, context=self.get_serializer_context()
                 ).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class TestTokenView(APIView):
+    def get(self, request):
+        user = request.user
+        return Response(
+            {
+                "user": UserSerializer(user).data,
             },
             status=status.HTTP_201_CREATED,
         )

@@ -17,6 +17,7 @@ sls = [
     "18:00 - 19:00",
     "19:00 - 20:00",
 ]
+RESERVED = "Rezervasyonu"
 
 
 def create_reservation_job(selection_preference):
@@ -90,6 +91,8 @@ def show_slots(browser):
 
         for well in wells:
             status = well.find("div").text
+            if RESERVED in status:
+                continue
             slot = well.find("span").text
             anchor = well.select('a[href^="javascript:__doPostBack"]')
             if anchor:

@@ -91,10 +91,20 @@ class Reservation(TimestampedModel):
     class Meta:
         ordering = ("selection__slot__date_time",)
 
+    @property
+    def is_success(self):
+        return self.status == Reservation.IN_CART
+
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         from reservations.helpers import send_reservation_email
 
         super().save(force_insert, force_update, using, update_fields)
+
         send_reservation_email(self)
+
+        status = ReservationJob.COMPLETED if self.is_success else ReservationJob.FAILED
+        ReservationJob.objects.filter(user=self.user, selection=self.selection).update(
+            status=status
+        )

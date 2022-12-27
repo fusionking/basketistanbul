@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from selections.models import SportSelection, Slot, Selection
+from selections.models import Selection, Slot, SportSelection
 
 # Register your models here.
 

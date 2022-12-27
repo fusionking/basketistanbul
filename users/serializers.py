@@ -13,7 +13,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password",
             "third_party_app_password",
             "email",
-            "phone_number",
+            "first_name",
+            "last_name",
         )
         extra_kwargs = {
             "password": {"write_only": True},
@@ -26,7 +27,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             tckn=validated_data["tckn"],
             password=validated_data["password"],
             third_party_app_password=validated_data["third_party_app_password"],
-            phone_number=validated_data["phone_number"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["first_name"],
         )
         return user
 
@@ -35,4 +37,4 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "tckn", "id", "phone_number")
+        fields = ("email", "tckn", "id", "phone_number", "first_name", "last_name")

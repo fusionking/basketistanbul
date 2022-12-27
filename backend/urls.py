@@ -2,12 +2,15 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from rest_framework import routers
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 
 from preferences.views import PreferenceViewSet
-from reservations.views import ReservationJobViewSet, ReservationViewSet, ShowSlotsView
-from selections.views import SelectionViewSet, SlotViewSet, SportSelectionViewSet
-from users.views import RegisterView
+from reservations.views import (ReservationJobViewSet, ReservationViewSet,
+                                ShowSlotsView)
+from selections.views import (SelectionViewSet, SlotViewSet,
+                              SportSelectionViewSet)
+from users.views import RegisterView, TestTokenView
 
 router = routers.DefaultRouter(trailing_slash=False)
 
@@ -28,6 +31,8 @@ urlpatterns = [
     # Slots
     path("show-slots/", ShowSlotsView.as_view(), name="show-slots"),
     # Register
-    path("register/", RegisterView.as_view()),
+    path("register/", RegisterView.as_view(), name="register"),
+    # test
+    path("test", TestTokenView.as_view(), name="test-token"),
     re_path(".*", TemplateView.as_view(template_name="index.html")),
 ]

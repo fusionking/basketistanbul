@@ -8,7 +8,15 @@ from reservations.models import Reservation
 
 
 class ReservationCommandRunner:
-    def __init__(self, user, selection, event_target=None, commands=None):
+    def __init__(
+        self,
+        user,
+        selection,
+        event_target=None,
+        commands=None,
+        is_max_retry=False,
+        court_selection=None,
+    ):
         # Browser
         self.browser = mechanicalsoup.StatefulBrowser()
         # User
@@ -19,11 +27,13 @@ class ReservationCommandRunner:
 
         # Pitch
         self.selection = selection
-        self.court_selection = selection.sport_selection.pitch_id
+        self.court_selection = (
+            selection.sport_selection.pitch_id if selection else court_selection
+        )
 
         # One of these must be set
         self.event_target = event_target
-        self.slot_date_time = selection.slot.date_time
+        self.slot_date_time = selection.slot.date_time if selection else None
 
         # Response
         self.response = None
@@ -52,6 +62,7 @@ class ReservationCommandRunner:
         self.current_command = self.build(commands)
 
         self.is_failure = False
+        self.is_max_retry = is_max_retry
 
     @staticmethod
     def build(commands=None):
@@ -125,7 +136,6 @@ class LoginCommand(BaseReservationCommand):
         browser["txtSifre"] = runner_instance.password
         response = browser.submit_selected()
         runner_instance.cookie = response.request.headers["Cookie"]
-        print(f"{runner_instance.cookie}")
         return self.next
 
 
@@ -172,6 +182,7 @@ class ResolveEventTargetCommand(BaseReservationCommand):
                 for s in slots
                 for s1 in s["slots"]
                 if s1["is_reservable"] is True
+                and s1["status"] != "Added by our application"
                 and s["date"] == runner_instance.slot_date_time.strftime("%d.%m.%Y")
             ]
 
@@ -278,7 +289,9 @@ class AddToCartCommand(BaseReservationCommand):
         browser = runner_instance.browser
 
         # add "lxml"
-        soup = bs(response.content.decode("utf8"), parser="html.parser")
+        soup = bs(
+            response.content.decode("utf8"), parser="html.parser", features="lxml"
+        )
         anchor = soup.find("a", id="pageContent_lbtnSepeteEkle")
         href = anchor.get("href")
         event_target = href[
@@ -315,12 +328,17 @@ class AddToCartCommand(BaseReservationCommand):
 
 class CreateReservationCommand(BaseReservationCommand):
     def execute(self, runner_instance):
-        if runner_instance.is_failure:
-            status = Reservation.FAILED
-        else:
-            status = Reservation.IN_CART
+        can_create_reservation = (
+            runner_instance.is_max_retry or not runner_instance.is_failure
+        )
+        if not can_create_reservation:
+            return
+
+        status = (
+            Reservation.FAILED if runner_instance.is_failure else Reservation.IN_CART
+        )
         Reservation.objects.create(
-            status=status,
             user=runner_instance.user,
             selection=runner_instance.selection,
+            status=status,
         )
