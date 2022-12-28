@@ -21,7 +21,7 @@ class ReservationJobSerializer(drf_serializers.ModelSerializer):
 
     class Meta:
         model = ReservationJob
-        fields = ("id", "selection", "execution_type", "execution_time")
+        fields = ("id", "selection", "execution_type", "execution_time", "status")
         read_only_fields = ("execution_type", "execution_time")
 
     def create(self, validated_data):

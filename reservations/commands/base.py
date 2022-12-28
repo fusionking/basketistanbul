@@ -3,6 +3,7 @@ import time
 
 import mechanicalsoup
 
+from reservations.enums import StatusCode
 from reservations.helpers import show_slots
 from reservations.models import Reservation
 
@@ -182,7 +183,7 @@ class ResolveEventTargetCommand(BaseReservationCommand):
                 for s in slots
                 for s1 in s["slots"]
                 if s1["is_reservable"] is True
-                and s1["status"] != "Added by our application"
+                and s1["status_code"] != StatusCode.WILL_BE_AVAILABLE.value
                 and s["date"] == runner_instance.slot_date_time.strftime("%d.%m.%Y")
             ]
 

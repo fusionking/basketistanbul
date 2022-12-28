@@ -13,6 +13,7 @@ from .serializers import ReservationJobSerializer, ReservationSerializer
 class ShowSlotsView(APIView):
     def get(self, request):
         court_selection = request.GET.get("court_selection")
+        show_future_slots = bool(int(request.GET.get("sfs", 1)))
         sport_selection = SportSelection.objects.get(pitch_id=court_selection)
         selection = Selection.objects.filter(sport_selection=sport_selection).last()
         runner = ReservationCommandRunner(
@@ -22,7 +23,7 @@ class ShowSlotsView(APIView):
             court_selection=court_selection,
         )
         runner()
-        data = show_slots(runner.browser)
+        data = show_slots(runner.browser, show_future_slots=show_future_slots)
         return Response(data)
 
 

@@ -1,3 +1,4 @@
+from celery.task.control import inspect, revoke
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -18,11 +19,15 @@ class ReservationJob(TimestampedModel):
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+    APPROVED = "APPROVED"
 
     STATUS_CHOICES = (
         (PENDING, "PENDING"),
         (COMPLETED, "COMPLETED"),
         (FAILED, "FAILED"),
+        (CANCELLED, "CANCELLED"),
+        (APPROVED, "APPROVED"),
     )
 
     ETA = "ETA"
@@ -54,16 +59,33 @@ class ReservationJob(TimestampedModel):
         return f"<ReservationJob> {self.execution_time.strftime('%Y-%m-%d %H:%M')} {self.status}"
 
     class Meta:
-        ordering = ("id",)
+        ordering = ("selection__slot__date_time",)
 
-    def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
-        super().save(force_insert, force_update, using, update_fields)
+    def revoke(self):
+        i = inspect()
+        scheduled_tasks = i.scheduled()
+        for _, tasks in scheduled_tasks.items():
+            rj_task = [task for task in tasks if task["request"]["args"][0] == self.id]
+            if rj_task:
+                revoke(rj_task[0]["request"]["id"])
+
+    def execute(self):
+        if self.status == self.CANCELLED:
+            return
+
         if self.execution_type == self.IMMEDIATE:
             execute_reservation_job.delay(self.id)
         else:
             execute_reservation_job.apply_async((self.id,), eta=self.execution_time)
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if self.status == self.CANCELLED:
+            self.revoke()
+
+        super().save(force_insert, force_update, using, update_fields)
+        self.execute()
 
 
 class Reservation(TimestampedModel):

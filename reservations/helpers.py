@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, timedelta
 
+from reservations.enums import StatusCode
 from reservations.models import ReservationJob
 
 sls = [
@@ -18,6 +19,7 @@ sls = [
     "19:00 - 20:00",
 ]
 RESERVED = "Rezervasyonu"
+SEPET = "Sepetinde"
 
 
 def create_reservation_job(selection_preference):
@@ -64,7 +66,7 @@ def send_reservation_email(reservation):
     mail_client.send(context)
 
 
-def show_slots(browser):
+def show_slots(browser, show_future_slots=True):
     data = {}
     slots = []
 
@@ -78,6 +80,10 @@ def show_slots(browser):
     )
     data["court"] = court_data.text
     data["court_id"] = court_data["value"]
+
+    reservation_hours_range = range(0, 72)
+    now = datetime.now().replace(tzinfo=None)
+    now_in_turkish_timezone = now + timedelta(hours=3)
 
     for pinfo in panel_infos:
         h3 = pinfo.find("h3").text
@@ -105,27 +111,46 @@ def show_slots(browser):
                 eventtarget = None
                 is_reservable = False
 
+            if is_reservable:
+                status_code = StatusCode.RESERVABLE.value
+                status = "Reservable"
+            else:
+                status_code = (
+                    StatusCode.ANOTHER_BASKET.value
+                    if SEPET in status
+                    else StatusCode.NO_SLOTS.value
+                )
+
             day_slots.append(
                 {
                     "slot": slot,
                     "status": status,
+                    "status_code": status_code,
                     "is_reservable": is_reservable,
                     "event_target": eventtarget,
                 }
             )
 
-        if not day_slots:
-            [
-                day_slots.append(
-                    {
-                        "slot": sl,
-                        "status": "Added by our application",
-                        "is_reservable": True,
-                        "event_target": None,
-                    }
-                )
-                for sl in sls
-            ]
+        if not day_slots and show_future_slots:
+            date_obj = datetime.strptime(date, "%d.%m.%Y")
+            time_diff_in_hours = (
+                (date_obj - now_in_turkish_timezone).total_seconds() // 60 // 60
+            )
+            if (time_diff_in_hours not in reservation_hours_range) and (
+                date_obj > now_in_turkish_timezone
+            ):
+                [
+                    day_slots.append(
+                        {
+                            "slot": sl,
+                            "status": "Reservable ETA",
+                            "status_code": StatusCode.WILL_BE_AVAILABLE.value,
+                            "is_reservable": True,
+                            "event_target": None,
+                        }
+                    )
+                    for sl in sls
+                ]
 
         slots.append(day_info)
     data["slots"] = slots
