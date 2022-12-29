@@ -92,11 +92,13 @@ class Reservation(TimestampedModel):
     PENDING = "PENDING"
     IN_CART = "IN_CART"
     FAILED = "FAILED"
+    REMOVED_FROM_BASKET = "REMOVED_FROM_BASKET"
 
     STATUS_CHOICES = (
         (IN_CART, "IN_CART"),
         (FAILED, "FAILED"),
         (PENDING, "PENDING"),
+        (REMOVED_FROM_BASKET, "REMOVED_FROM_BASKET"),
     )
 
     user = models.ForeignKey(
@@ -124,9 +126,12 @@ class Reservation(TimestampedModel):
 
         super().save(force_insert, force_update, using, update_fields)
 
-        send_reservation_email(self)
+        if self.status != Reservation.REMOVED_FROM_BASKET:
+            send_reservation_email(self)
 
-        status = ReservationJob.COMPLETED if self.is_success else ReservationJob.FAILED
-        ReservationJob.objects.filter(user=self.user, selection=self.selection).update(
-            status=status
-        )
+            status = (
+                ReservationJob.COMPLETED if self.is_success else ReservationJob.FAILED
+            )
+            ReservationJob.objects.filter(
+                user=self.user, selection=self.selection
+            ).update(status=status)

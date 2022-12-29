@@ -1,10 +1,12 @@
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from selections.models import Selection, SportSelection
 
-from .commands.base import FillFormCommand, LoginCommand, ReservationCommandRunner
+from .commands.base import (FillFormCommand, LoginCommand,
+                            RemoveFromBasketCommand, ReservationCommandRunner)
 from .helpers import show_slots
 from .models import Reservation, ReservationJob
 from .serializers import ReservationJobSerializer, ReservationSerializer
@@ -33,6 +35,21 @@ class ReservationViewSet(ModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
+
+    @action(methods=["POST"], detail=False, url_path="remove-basket")
+    def remove_basket(self, *args, **kwargs):
+        request = args[0]
+        reservation = Reservation.objects.get(id=request.data["id"])
+        runner = ReservationCommandRunner(
+            request.user,
+            reservation.selection,
+            commands=[LoginCommand(), RemoveFromBasketCommand()],
+            court_selection=None,
+        )
+        runner()
+        reservation.status = Reservation.REMOVED_FROM_BASKET
+        reservation.save()
+        return Response({"status": "OK"})
 
 
 class ReservationJobViewSet(ModelViewSet):

@@ -1,4 +1,5 @@
 import abc
+import re
 import time
 
 import mechanicalsoup
@@ -325,6 +326,78 @@ class AddToCartCommand(BaseReservationCommand):
         response = browser.post(browser.url, data=data, headers=headers)
         runner_instance.is_failure = True if not response.ok else False
         return self.next
+
+
+class RemoveFromBasketCommand(BaseReservationCommand):
+    URL_PATH = "uyesepet"
+
+    def execute(self, runner_instance):
+        browser = runner_instance.browser
+        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
+        event_target = None
+        table = browser.page.find("table", id="dataTable1")
+        tbody = table.find("tbody")
+        trs = tbody.findAll("tr")
+        for tr in trs:
+            tds = tr.findAll("td")
+            td_time = tds[1]
+            time_match = re.search(r"(\d{1}\d{1}):\d{1}\d{1}", td_time.text).groups()
+            slot_start_hour = time_match[0] if time_match else None
+            slot_start_hour = (
+                slot_start_hour[1]
+                if slot_start_hour.startswith("0")
+                else slot_start_hour[:]
+            )
+
+            td_date = tds[2]
+            td_date_match = re.search(
+                r"(\d+\.\d+\.\d+)\s-\s(\d+\.\d+\.\d+)", td_date.text
+            ).groups()
+            slot_date = td_date_match[0] if td_date_match else None
+
+            if all(
+                (
+                    (slot_start_hour is not None),
+                    (runner_instance.selection is not None),
+                    (
+                        str(runner_instance.selection.slot.date_time.hour)
+                        == slot_start_hour
+                    ),
+                    (
+                        str(
+                            runner_instance.selection.slot.date_time.strftime(
+                                "%d.%m.%Y"
+                            )
+                        )
+                        == slot_date
+                    ),
+                )
+            ):
+                event_target = tds[-1].find("a").get("href")[25:63]
+                break
+
+        if event_target:
+            inp = browser.page.find("input", id="__VIEWSTATE")
+            view_state = inp.get("value")
+            headers = {
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Cache-Control": "max-age=0",
+                "Cookie": runner_instance.cookie,
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-User": "?1",
+                "Upgrade-Insecure-Requests": "1",
+                **runner_instance.base_headers,
+            }
+            data = {
+                "__VIEWSTATE": view_state,
+                "__EVENTTARGET": event_target,
+                "__VIEWSTATEGENERATOR": "2730706D",
+                "__EVENT_ARGUMENT": None,
+            }
+            response = browser.post(browser.url, data=data, headers=headers)
+            runner_instance.is_failure = True if not response.ok else False
+            return self.next
 
 
 class CreateReservationCommand(BaseReservationCommand):
