@@ -1,8 +1,10 @@
+from datetime import timedelta
+
 from celery.task.control import inspect, revoke
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from reservations.tasks import execute_reservation_job
+from reservations.tasks import check_basket, execute_reservation_job
 
 User = get_user_model()
 
@@ -93,12 +95,16 @@ class Reservation(TimestampedModel):
     IN_CART = "IN_CART"
     FAILED = "FAILED"
     REMOVED_FROM_BASKET = "REMOVED_FROM_BASKET"
+    PAID = "PAID"
+    EXPIRED = "EXPIRED"
 
     STATUS_CHOICES = (
         (IN_CART, "IN_CART"),
         (FAILED, "FAILED"),
         (PENDING, "PENDING"),
         (REMOVED_FROM_BASKET, "REMOVED_FROM_BASKET"),
+        (PAID, "PAID"),
+        (EXPIRED, "EXPIRED"),
     )
 
     user = models.ForeignKey(
@@ -126,7 +132,7 @@ class Reservation(TimestampedModel):
 
         super().save(force_insert, force_update, using, update_fields)
 
-        if self.status != Reservation.REMOVED_FROM_BASKET:
+        if self.status in (Reservation.IN_CART, Reservation.FAILED):
             send_reservation_email(self)
 
             status = (
@@ -135,3 +141,8 @@ class Reservation(TimestampedModel):
             ReservationJob.objects.filter(
                 user=self.user, selection=self.selection
             ).update(status=status)
+
+        if self.status == Reservation.IN_CART:
+            check_basket.apply_async(
+                (self.id,), eta=self.created_at + timedelta(hours=12)
+            )

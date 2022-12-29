@@ -93,8 +93,9 @@ class ReservationCommandRunner:
             command = command(self)
         # Execute last command if no early return
         if command:
-            command(self)
-        print("Chain finished")
+            result = command(self)
+            print("Chain finished")
+            return result
 
 
 class BaseReservationCommand(metaclass=abc.ABCMeta):
@@ -398,6 +399,92 @@ class RemoveFromBasketCommand(BaseReservationCommand):
             response = browser.post(browser.url, data=data, headers=headers)
             runner_instance.is_failure = True if not response.ok else False
             return self.next
+
+
+class CheckReservationCommand(BaseReservationCommand):
+    URL_PATH = "uyespor"
+
+    def execute(self, runner_instance):
+        from bs4 import BeautifulSoup as bs
+
+        browser = runner_instance.browser
+        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
+        event_target = None
+        table = browser.page.find("table", id="dtUyeSpor")
+        tbody = table.find("tbody")
+        trs = tbody.findAll("tr")
+        for tr in trs:
+            tds = tr.findAll("td")
+            td_time = tds[0]
+            time_match = re.search(r"(\d{1}\d{1}):\d{1}\d{1}", td_time.text).groups()
+            slot_start_hour = time_match[0] if time_match else None
+            slot_start_hour = (
+                slot_start_hour[1]
+                if slot_start_hour.startswith("0")
+                else slot_start_hour[:]
+            )
+
+            td_date = tds[1]
+            td_date_match = re.search(
+                r"(\d+\.\d+\.\d+)\s-\s(\d+\.\d+\.\d+)", td_date.text
+            ).groups()
+            slot_date = td_date_match[0] if td_date_match else None
+
+            if all(
+                (
+                    (slot_start_hour is not None),
+                    (runner_instance.selection is not None),
+                    (
+                        str(runner_instance.selection.slot.date_time.hour)
+                        == slot_start_hour
+                    ),
+                    (
+                        str(
+                            runner_instance.selection.slot.date_time.strftime(
+                                "%d.%m.%Y"
+                            )
+                        )
+                        == slot_date
+                    ),
+                )
+            ):
+                event_target = tds[-1].find("a").get("href")[25:73]
+                break
+
+        if event_target:
+            inp = browser.page.find("input", id="__VIEWSTATE")
+            view_state = inp.get("value")
+            headers = {
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Cache-Control": "max-age=0",
+                "Cookie": runner_instance.cookie,
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-User": "?1",
+                "Upgrade-Insecure-Requests": "1",
+                **runner_instance.base_headers,
+            }
+            data = {
+                "__VIEWSTATE": view_state,
+                "__EVENTTARGET": event_target,
+                "__VIEWSTATEGENERATOR": "76CD4AB0",
+                "__EVENT_ARGUMENT": None,
+            }
+            response = browser.post(browser.url, data=data, headers=headers)
+            runner_instance.is_failure = True if not response.ok else False
+            soup = bs(
+                response.content.decode("utf8"), parser="html.parser", features="lxml"
+            )
+            table = soup.find("table", id="dtUyeSpor")
+            tbody = table.find("tbody")
+            tr = tbody.findAll("tr")[2]
+            td = tr.findAll("td")[4]
+            status_text = td.text
+            if status_text == "Satış Yapıldı":
+                return True
+            else:
+                return False
+        return False
 
 
 class CreateReservationCommand(BaseReservationCommand):
