@@ -22,8 +22,7 @@ RESERVED = "Rezervasyonu"
 SEPET = "Sepetinde"
 
 
-def create_reservation_job(selection_preference):
-    selection = selection_preference.selection
+def create_reservation_job(selection, user):
     # In UTC
     # slot_date_time = 29.12.2022 07:00
     # in UTC this will be 29.12.2022 04:00
@@ -44,7 +43,7 @@ def create_reservation_job(selection_preference):
     return ReservationJob.objects.create(
         execution_time=execution_time,
         selection=selection,
-        user=selection_preference.preference.user,
+        user=user,
         execution_type=execution_type,
     )
 

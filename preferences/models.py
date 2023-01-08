@@ -37,4 +37,4 @@ class SelectionPreference(TimestampedModel):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         super().save(force_insert, force_update, using, update_fields)
-        create_reservation_job(self)
+        create_reservation_job(selection=self.selection, user=self.preference.user)

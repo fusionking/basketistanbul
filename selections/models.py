@@ -67,7 +67,7 @@ class Slot(TimestampedModel):
         return f"<Slot> {self.date_time.strftime('%Y-%m-%d %H:%M')}"
 
     class Meta:
-        ordering = ("id",)
+        ordering = ("-date_time",)
 
     @property
     def formatted_date(self):

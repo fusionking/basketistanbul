@@ -64,6 +64,7 @@ class ReservationCommandRunner:
         self.current_command = self.build(commands)
 
         self.is_failure = False
+        self.is_no_slot = False
         self.is_max_retry = is_max_retry
 
     @staticmethod
@@ -199,6 +200,7 @@ class ResolveEventTargetCommand(BaseReservationCommand):
             if not reservable_slots:
                 print("No reservable field found! Returning")
                 runner_instance.is_failure = True
+                runner_instance.is_no_slot = True
                 return self.next
 
             event_target = reservable_slots[0]["event_target"]

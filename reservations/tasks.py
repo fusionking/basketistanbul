@@ -2,6 +2,43 @@ from celery.task import task
 from django.conf import settings
 
 
+def try_to_reserve(current_selection, user):
+    from selections.constants import CLOSED_COURT_IDS
+    from selections.models import Selection, Slot, SportSelection
+
+    from .commands.base import ReservationCommandRunner
+
+    current_pitch_id = current_selection.sport_selection.pitch_id
+    other_pitch_ids = [
+        court_id for court_id in CLOSED_COURT_IDS if court_id != current_pitch_id
+    ]
+
+    current_slot_date_obj = current_selection.slot.date_time
+
+    for pitch_id in other_pitch_ids:
+        print(
+            f"***** Trying to reserve {pitch_id} now for slot {current_slot_date_obj.date()} ******"
+        )
+        slot, _ = Slot.objects.get_or_create(
+            date_time__date=current_slot_date_obj,
+            date_time__hour=current_slot_date_obj.hour,
+            defaults={"date_time": current_slot_date_obj},
+        )
+        # Get or create Sport Selection
+        sport_selection, _ = SportSelection.objects.get_or_create(pitch_id=pitch_id)
+        # Get or create Selection
+        selection, _ = Selection.objects.get_or_create(
+            sport_selection=sport_selection, slot=slot
+        )
+
+        runner = ReservationCommandRunner(user, selection)
+        runner()
+
+        if not runner.is_failure:
+            return True
+    return False
+
+
 @task(
     bind=True,
     max_retries=3,
@@ -20,6 +57,10 @@ def execute_reservation_job(self, reservation_job_id, retry_count=0):
     runner()
 
     if runner.is_failure:
+        if runner.is_no_slot and try_to_reserve(
+            reservation_job.selection, reservation_job.user
+        ):
+            return
         raise self.retry(kwargs={"retry_count": retry_count + 1})
 
 

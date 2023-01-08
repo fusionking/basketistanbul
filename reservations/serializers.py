@@ -5,6 +5,7 @@ from rest_framework import serializers as drf_serializers
 from selections.models import Selection, Slot, SportSelection
 from selections.serializers import SelectionSerializer
 
+from .helpers import create_reservation_job
 from .models import Reservation, ReservationJob
 
 
@@ -43,13 +44,5 @@ class ReservationJobSerializer(drf_serializers.ModelSerializer):
         selection, created = Selection.objects.get_or_create(
             sport_selection=sport_selection, slot=slot
         )
-        reservation_job, _ = ReservationJob.objects.get_or_create(
-            user=validated_data["user"],
-            selection=selection,
-            defaults={
-                "execution_time": datetime.now(),
-                "execution_type": ReservationJob.IMMEDIATE,
-            },
-        )
-
+        reservation_job = create_reservation_job(selection, validated_data["user"])
         return reservation_job
