@@ -2,14 +2,11 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from rest_framework import routers
-from rest_framework_simplejwt.views import (TokenObtainPairView,
-                                            TokenRefreshView)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from preferences.views import PreferenceViewSet
-from reservations.views import (ReservationJobViewSet, ReservationViewSet,
-                                ShowSlotsView)
-from selections.views import (SelectionViewSet, SlotViewSet,
-                              SportSelectionViewSet)
+from reservations.views import ReservationJobViewSet, ReservationViewSet, ShowSlotsView
+from selections.views import SelectionViewSet, SlotViewSet, SportSelectionViewSet
 from users.views import RegisterView, TestTokenView
 
 router = routers.DefaultRouter(trailing_slash=False)

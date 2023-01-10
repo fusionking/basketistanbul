@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,8 +6,13 @@ from rest_framework.viewsets import ModelViewSet
 
 from selections.models import Selection, SportSelection
 
-from .commands.base import (FillFormCommand, LoginCommand,
-                            RemoveFromBasketCommand, ReservationCommandRunner)
+from .commands.base import (
+    FillFormCommand,
+    LoginCommand,
+    RemoveFromBasketCommand,
+    ReservationCommandRunner,
+)
+from .filters import StatusFilter
 from .helpers import show_slots
 from .models import Reservation, ReservationJob
 from .serializers import ReservationJobSerializer, ReservationSerializer
@@ -32,6 +38,8 @@ class ShowSlotsView(APIView):
 class ReservationViewSet(ModelViewSet):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StatusFilter
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
@@ -55,6 +63,8 @@ class ReservationViewSet(ModelViewSet):
 class ReservationJobViewSet(ModelViewSet):
     queryset = ReservationJob.objects.all()
     serializer_class = ReservationJobSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StatusFilter
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)

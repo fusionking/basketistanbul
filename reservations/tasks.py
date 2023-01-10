@@ -49,6 +49,10 @@ def execute_reservation_job(self, reservation_job_id, retry_count=0):
     from .models import ReservationJob
 
     reservation_job = ReservationJob.objects.get(id=reservation_job_id)
+
+    if reservation_job.status == ReservationJob.CANCELLED:
+        return
+
     runner = ReservationCommandRunner(
         reservation_job.user,
         reservation_job.selection,
@@ -66,8 +70,7 @@ def execute_reservation_job(self, reservation_job_id, retry_count=0):
 
 @task
 def check_basket(reservation_id):
-    from reservations.commands.base import (CheckReservationCommand,
-                                            LoginCommand)
+    from reservations.commands.base import CheckReservationCommand, LoginCommand
 
     from .commands.base import ReservationCommandRunner
     from .models import Reservation
