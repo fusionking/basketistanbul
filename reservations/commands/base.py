@@ -7,6 +7,7 @@ import mechanicalsoup
 from reservations.enums import StatusCode
 from reservations.helpers import show_slots
 from reservations.models import Reservation
+from reservations.utils import get_legacy_session
 
 
 class ReservationCommandRunner:
@@ -20,7 +21,7 @@ class ReservationCommandRunner:
         court_selection=None,
     ):
         # Browser
-        self.browser = mechanicalsoup.StatefulBrowser()
+        self.browser = mechanicalsoup.StatefulBrowser(session=get_legacy_session())
         # User
         self.user = user
         self.tckn = user.tckn
@@ -134,7 +135,7 @@ class LoginCommand(BaseReservationCommand):
         if runner_instance.is_failure:
             return self.next
         browser = runner_instance.browser
-        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
+        browser.open(f"{self.base_url}/{self.URL_PATH}")
         browser.select_form()
         browser["txtTCPasaport"] = runner_instance.tckn
         browser["txtSifre"] = runner_instance.password
@@ -336,7 +337,7 @@ class RemoveFromBasketCommand(BaseReservationCommand):
 
     def execute(self, runner_instance):
         browser = runner_instance.browser
-        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
+        browser.open(f"{self.base_url}/{self.URL_PATH}")
         event_target = None
         table = browser.page.find("table", id="dataTable1")
         tbody = table.find("tbody")
@@ -410,7 +411,7 @@ class CheckReservationCommand(BaseReservationCommand):
         from bs4 import BeautifulSoup as bs
 
         browser = runner_instance.browser
-        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
+        browser.open(f"{self.base_url}/{self.URL_PATH}")
         event_target = None
         table = browser.page.find("table", id="dtUyeSpor")
         tbody = table.find("tbody")

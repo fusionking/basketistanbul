@@ -23,12 +23,12 @@ click-plugins==1.1.1
 click-repl==0.2.0
 cookiecutter==2.1.1
 coverage==7.0.0
-cryptography==36.0.2
+cryptography==38.0.4
 decorator==5.1.1
-Django==3.0
-# django-appconf==1.0.5
-# django-cors-headers==3.13.0
-django-cryptography==1.0
+Django @ https://github.com/django/django/archive/main.tar.gz
+django-appconf==1.0.5
+django-cors-headers==3.13.0
+django-cryptography==1.1
 django-environ==0.9.0
 django-extensions==3.1.5
 django-filter==22.1
