@@ -157,19 +157,19 @@ class FillFormCommand(BaseReservationCommand):
             "ctl00$pageContent$ddlBransFiltre"
         ] = "59b7bd71-1aab-4751-8248-7af4a7790f8c"
         browser.submit_selected()
-        time.sleep(2)
+        time.sleep(0.5)
 
         browser.select_form()
         browser[
             "ctl00$pageContent$ddlTesisFiltre"
         ] = "6989b491-bb85-414a-b470-293b190ebb44"
         browser.submit_selected()
-        time.sleep(2)
+        time.sleep(0.5)
 
         browser.select_form()
         browser["ctl00$pageContent$ddlSalonFiltre"] = runner_instance.court_selection
         browser.submit_selected()
-        time.sleep(2)
+        time.sleep(0.5)
 
         return self.next
 
@@ -215,7 +215,7 @@ class ReservationClickCommand(BaseReservationCommand):
         if runner_instance.is_failure:
             return self.next
 
-        time.sleep(2)
+        time.sleep(1)
         browser = runner_instance.browser
         # Satis Kiralik Rezervasyon
 
@@ -252,7 +252,7 @@ class ReservationChoiceCommand(BaseReservationCommand):
         if runner_instance.is_failure:
             return self.next
 
-        time.sleep(5)
+        time.sleep(1)
         # Kiralama Secimi
         browser = runner_instance.browser
 
@@ -290,7 +290,7 @@ class AddToCartCommand(BaseReservationCommand):
         if runner_instance.is_failure:
             return self.next
 
-        time.sleep(5)
+        time.sleep(1)
         response = runner_instance.response
         browser = runner_instance.browser
 

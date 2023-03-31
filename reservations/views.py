@@ -6,12 +6,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from selections.models import Selection, SportSelection
 
-from .commands.base import (
-    FillFormCommand,
-    LoginCommand,
-    RemoveFromBasketCommand,
-    ReservationCommandRunner,
-)
+from .commands.base import (FillFormCommand, LoginCommand,
+                            RemoveFromBasketCommand, ReservationCommandRunner)
 from .filters import StatusFilter
 from .helpers import show_slots
 from .models import Reservation, ReservationJob

@@ -41,8 +41,8 @@ def try_to_reserve(current_selection, user):
 
 @task(
     bind=True,
-    max_retries=3,
-    default_retry_delay=settings.DEFAULT_TASK_COUNTDOWN_MINUTES * 60,
+    max_retries=4,
+    default_retry_delay=settings.DEFAULT_TASK_COUNTDOWN_SECONDS,
 )
 def execute_reservation_job(self, reservation_job_id, retry_count=0):
     from .commands.base import ReservationCommandRunner
@@ -70,7 +70,8 @@ def execute_reservation_job(self, reservation_job_id, retry_count=0):
 
 @task
 def check_basket(reservation_id):
-    from reservations.commands.base import CheckReservationCommand, LoginCommand
+    from reservations.commands.base import (CheckReservationCommand,
+                                            LoginCommand)
 
     from .commands.base import ReservationCommandRunner
     from .models import Reservation

@@ -1,6 +1,7 @@
+import ssl
+
 import requests
 import urllib3
-import ssl
 
 
 class CustomHttpAdapter(requests.adapters.HTTPAdapter):

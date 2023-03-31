@@ -38,7 +38,8 @@ def create_reservation_job(selection, user):
         execution_type = ReservationJob.IMMEDIATE
     else:
         # To be able to convert to UTC
-        execution_time = slot_date_time - timedelta(days=3, hours=3)
+        # Slots are open 3 days before, however there is a buffer of 10 seconds before the slot is opened
+        execution_time = slot_date_time - timedelta(days=3, hours=3, seconds=10)
         execution_type = ReservationJob.ETA
     return ReservationJob.objects.create(
         execution_time=execution_time,
