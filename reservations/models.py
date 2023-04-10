@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from celery.task.control import inspect, revoke
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -144,5 +145,5 @@ class Reservation(TimestampedModel):
 
         if self.status == Reservation.IN_CART:
             check_basket.apply_async(
-                (self.id,), eta=self.created_at + timedelta(hours=12)
+                (self.id,), eta=self.created_at + relativedelta(minutes=30)
             )

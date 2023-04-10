@@ -418,8 +418,10 @@ class CheckReservationCommand(BaseReservationCommand):
         trs = tbody.findAll("tr")
         for tr in trs:
             tds = tr.findAll("td")
-            td_time = tds[0]
-            time_match = re.search(r"(\d{1}\d{1}):\d{1}\d{1}", td_time.text).groups()
+            td_time = tds[1]
+            time_match = re.search(
+                r"(\d{1}\d{1}):\d{1}\d{1}:\d{1}\d{1}\s-\s(\d{1}\d{1})", td_time.text
+            ).groups()
             slot_start_hour = time_match[0] if time_match else None
             slot_start_hour = (
                 slot_start_hour[1]
@@ -427,7 +429,7 @@ class CheckReservationCommand(BaseReservationCommand):
                 else slot_start_hour[:]
             )
 
-            td_date = tds[1]
+            td_date = tds[2]
             td_date_match = re.search(
                 r"(\d+\.\d+\.\d+)\s-\s(\d+\.\d+\.\d+)", td_date.text
             ).groups()
