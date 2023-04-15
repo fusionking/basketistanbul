@@ -21,7 +21,7 @@ class ReservationCommandRunner:
         court_selection=None,
     ):
         # Browser
-        self.browser = mechanicalsoup.StatefulBrowser(session=get_legacy_session())
+        self.browser = mechanicalsoup.StatefulBrowser()
         # User
         self.user = user
         self.tckn = user.tckn
@@ -135,7 +135,7 @@ class LoginCommand(BaseReservationCommand):
         if runner_instance.is_failure:
             return self.next
         browser = runner_instance.browser
-        browser.open(f"{self.base_url}/{self.URL_PATH}")
+        browser.open(f"{self.base_url}/{self.URL_PATH}", verify=False)
         browser.select_form()
         browser["txtTCPasaport"] = runner_instance.tckn
         browser["txtSifre"] = runner_instance.password
