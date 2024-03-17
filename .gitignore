@@ -115,7 +115,5 @@ report_unittest.xml
 package-lock.json
 package.json
 
-Dockerfile
-
 /node_modules
 

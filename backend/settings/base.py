@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_json_api",
+    # "rest_framework_json_api",
     "corsheaders",
     "users",
     "selections",
@@ -146,14 +146,12 @@ REST_FRAMEWORK = {
 }
 
 # Allowed hosts
-ALLOWED_HOSTS = [
-    "django",
-    "localhost",
-]
+ALLOWED_HOSTS = ["django", "localhost", "react"]
 
 # Cors
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost",
 ]
 
 # Custom user model

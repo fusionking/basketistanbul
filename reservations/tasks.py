@@ -31,7 +31,7 @@ def try_to_reserve(current_selection, user):
             sport_selection=sport_selection, slot=slot
         )
 
-        runner = ReservationCommandRunner(user, selection)
+        runner = ReservationCommandRunner(user, selection, selection.sport_selection)
         runner()
 
         if not runner.is_failure:
@@ -56,6 +56,7 @@ def execute_reservation_job(self, reservation_job_id, retry_count=0):
     runner = ReservationCommandRunner(
         reservation_job.user,
         reservation_job.selection,
+        reservation_job.selection.sport_selection,
         is_max_retry=self.max_retries == retry_count,
     )
     runner()
@@ -82,6 +83,7 @@ def check_basket(reservation_id):
     runner = ReservationCommandRunner(
         reservation.user,
         selection,
+        selection.sport_selection,
         commands=[LoginCommand(), CheckReservationCommand()],
         court_selection=selection.sport_selection.pitch_id,
     )

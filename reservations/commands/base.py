@@ -8,6 +8,7 @@ from reservations.enums import StatusCode
 from reservations.helpers import show_slots
 from reservations.models import Reservation
 from reservations.utils import get_legacy_session
+from selections.constants import BRANCH_TENNIS_ID
 
 
 class ReservationCommandRunner:
@@ -15,6 +16,7 @@ class ReservationCommandRunner:
         self,
         user,
         selection,
+        sport_selection,
         event_target=None,
         commands=None,
         is_max_retry=False,
@@ -30,8 +32,9 @@ class ReservationCommandRunner:
 
         # Pitch
         self.selection = selection
+        self.sport_selection = sport_selection
         self.court_selection = (
-            selection.sport_selection.pitch_id if selection else court_selection
+            self.sport_selection.pitch_id if selection else court_selection
         )
 
         # One of these must be set
@@ -57,8 +60,8 @@ class ReservationCommandRunner:
         self.base_data = {
             "__EVENTARGUMENT": None,
             "__LASTFOCUS": None,
-            "ctl00$pageContent$ddlBransFiltre": "59b7bd71-1aab-4751-8248-7af4a7790f8c",
-            "ctl00$pageContent$ddlTesisFiltre": "6989b491-bb85-414a-b470-293b190ebb44",
+            "ctl00$pageContent$ddlBransFiltre": BRANCH_TENNIS_ID,
+            "ctl00$pageContent$ddlTesisFiltre": self.sport_selection.complex_id,
             "ctl00$pageContent$ddlSalonFiltre": self.court_selection,
             "__VIEWSTATEGENERATOR": "BA851843",
         }
@@ -162,12 +165,12 @@ class FillFormCommand(BaseReservationCommand):
         browser.select_form()
         browser[
             "ctl00$pageContent$ddlTesisFiltre"
-        ] = "6989b491-bb85-414a-b470-293b190ebb44"
+        ] = runner_instance.sport_selection.complex_id
         browser.submit_selected()
-        time.sleep(0.5)
+        time.sleep(0.8)
 
         browser.select_form()
-        browser["ctl00$pageContent$ddlSalonFiltre"] = runner_instance.court_selection
+        browser["ctl00$pageContent$ddlSalonFiltre"] = runner_instance.court_selection.strip()
         browser.submit_selected()
         time.sleep(0.5)
 
@@ -418,7 +421,7 @@ class CheckReservationCommand(BaseReservationCommand):
         trs = tbody.findAll("tr")
         for tr in trs:
             tds = tr.findAll("td")
-            td_time = tds[1]
+            td_time = tds[2]
             time_match = re.search(
                 r"(\d{1}\d{1}):\d{1}\d{1}:\d{1}\d{1}\s-\s(\d{1}\d{1})", td_time.text
             ).groups()
@@ -429,7 +432,7 @@ class CheckReservationCommand(BaseReservationCommand):
                 else slot_start_hour[:]
             )
 
-            td_date = tds[2]
+            td_date = tds[3]
             td_date_match = re.search(
                 r"(\d+\.\d+\.\d+)\s-\s(\d+\.\d+\.\d+)", td_date.text
             ).groups()

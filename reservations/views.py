@@ -23,6 +23,7 @@ class ShowSlotsView(APIView):
         runner = ReservationCommandRunner(
             request.user,
             selection,
+            sport_selection,
             commands=[LoginCommand(), FillFormCommand()],
             court_selection=court_selection,
         )
@@ -47,6 +48,7 @@ class ReservationViewSet(ModelViewSet):
         runner = ReservationCommandRunner(
             request.user,
             reservation.selection,
+            reservation.selection.sport_selection,
             commands=[LoginCommand(), RemoveFromBasketCommand()],
             court_selection=None,
         )
